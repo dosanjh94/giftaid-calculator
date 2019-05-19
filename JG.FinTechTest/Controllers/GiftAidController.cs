@@ -33,6 +33,10 @@ namespace JG.FinTechTest.Controllers
             {
                 return BadRequest();
             }
+            if(amount < 2 || amount > 100000)
+            {
+                return BadRequest("The input must be more the 2 but less that 100000");
+            }
 
             var response = new GiftAidResponse {
                 DonationAmount= amount.Value,
