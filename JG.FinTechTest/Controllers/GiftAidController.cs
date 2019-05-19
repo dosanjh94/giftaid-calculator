@@ -19,6 +19,13 @@ namespace JG.FinTechTest.Controllers
             _calculator = calculator;
         }
 
+        /// <summary>
+        /// Get the amount of gift aid reclaimable for donation amount
+        /// </summary>
+        /// <param name="amount">The value of the donation made</param>
+        /// <returns>The amount of Gift Aid for the donation</returns>
+        /// <response code="200">Returns the Git Aid amount</response>
+        /// <response code="400">If no or invalid amount is recieved</response>  
         [HttpGet]
         public IActionResult Get([FromQuery] decimal? amount)
         {
