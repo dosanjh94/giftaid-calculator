@@ -1,6 +1,6 @@
 ﻿namespace JG.FinTechTest.Calculator
 {
-    interface IGiftAidCalculator
+    public interface IGiftAidCalculator
     {
         decimal CalculateGiftAid(decimal donation);
     }

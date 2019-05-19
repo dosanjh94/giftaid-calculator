@@ -2,9 +2,9 @@ using JG.FinTechTest.Calculator;
 using NUnit.Framework;
 using System;
 
-namespace Tests
+namespace JG.FinTechTest.Tests
 {
-    public class GiftAidCalculatorTest
+    public class GiftAidControllerTest
     {
         [Test]
         [TestCase(0,0)]
