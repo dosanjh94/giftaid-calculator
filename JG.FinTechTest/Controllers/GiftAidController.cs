@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JG.FinTechTest.Calculator;
 using JG.FinTechTest.Models;
+using JG.FinTechTest.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JG.FinTechTest.Controllers
@@ -13,10 +14,12 @@ namespace JG.FinTechTest.Controllers
     public class GiftAidController : ControllerBase
     {
         private readonly IGiftAidCalculator _calculator;
+        private readonly IDonationRepository _donationRepositroy;
 
-        public GiftAidController(IGiftAidCalculator calculator)
+        public GiftAidController(IGiftAidCalculator calculator, IDonationRepository donationRepository)
         {
             _calculator = calculator;
+            _donationRepositroy = donationRepository;
         }
 
         /// <summary>
@@ -44,6 +47,33 @@ namespace JG.FinTechTest.Controllers
             };
             
             return Ok(response);
+        }
+
+        /// <summary>
+        /// Post a donation eligible for a gift aid reclaim
+        /// </summary>
+        /// <param name="donation"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public IActionResult Post([FromBody] GiftAidDonation donation)
+        {
+            if (donation.DonationAmount < 2 || donation.DonationAmount > 100000)
+            {
+                return BadRequest();
+            }
+
+            if (string.IsNullOrWhiteSpace(donation.Name))
+            {
+                return BadRequest();
+            }
+
+            if (string.IsNullOrWhiteSpace(donation.PostCode))
+            {
+                return BadRequest();
+            }
+
+            var result =_donationRepositroy.RecordDonation(donation);
+            return Created(result.Id.ToString(), result);
         }
     }
 }

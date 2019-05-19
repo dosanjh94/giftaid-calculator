@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JG.FinTechTest.Calculator;
+using JG.FinTechTest.Repositories;
+using LiteDB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -29,6 +31,8 @@ namespace JG.FinTechTest
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddTransient<IGiftAidCalculator, GiftAidCalculator>();
+            services.AddTransient<IDonationRepository, DonationRepository>();
+            services.AddTransient(x => new LiteDatabase("main.db"));
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>

@@ -1,43 +1,55 @@
 using JG.FinTechTest.Calculator;
 using JG.FinTechTest.Controllers;
+using JG.FinTechTest.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using NUnit.Framework;
+using LiteDB;
+using System.IO;
+using JG.FinTechTest.Models;
 using System;
 
 namespace JG.FinTechTest.Tests.Controllers
 {
     public class GiftAidControllerTest
     {
-        [Test]
-        public void CalledWithNullAmount()
+        private IGiftAidCalculator _calculator;
+        private IDonationRepository _donationRepository;
+        private GiftAidController _controller;
+
+        [SetUp]
+        public void Setup()
         {
-            var calculator = Substitute.For<IGiftAidCalculator>();
-            var controller = new GiftAidController(calculator);
-            var result = controller.Get(null);
+            _calculator = Substitute.For<IGiftAidCalculator>();
+            _donationRepository = Substitute.For<IDonationRepository>();
+            _controller = new GiftAidController(_calculator, _donationRepository);
+        }
+
+        [Test]
+        public void CalledGetWithNullAmount()
+        {
+            var result = _controller.Get(null);
 
             var badRequestResult = result as BadRequestResult;
 
             Assert.IsNotNull(badRequestResult);
-            calculator.DidNotReceive();
+            _calculator.DidNotReceive();
         }
 
         [Test]
-        public void CalledWithAmount()
+        public void CalledGetWithAmount()
         {
-            var calculator = Substitute.For<IGiftAidCalculator>();
-
             var amount = 100;
             var giftAidAmount = 25;
 
-            calculator.CalculateGiftAid(amount).Returns(giftAidAmount);
-            var controller = new GiftAidController(calculator);
-            var result = controller.Get(amount);
+            _calculator.CalculateGiftAid(amount).Returns(giftAidAmount);
+
+            var result = _controller.Get(amount);
 
             var okResult = result as OkObjectResult;
 
             Assert.IsNotNull(okResult);
-            calculator.Received().CalculateGiftAid(amount);
+            _calculator.Received().CalculateGiftAid(amount);
         }
 
         [Test]
@@ -45,17 +57,58 @@ namespace JG.FinTechTest.Tests.Controllers
         [TestCase(1.99)]
         [TestCase(10000000)]
         [TestCase(-5)]
-        public void CalledWithInvalidAmount(decimal amount)
+        public void CalledGetWithInvalidAmount(decimal amount)
         {
-            var calculator = Substitute.For<IGiftAidCalculator>();
-            var controller = new GiftAidController(calculator);
-            var result = controller.Get(amount);
+            var result = _controller.Get(amount);
 
             var badRequestResult = result as BadRequestObjectResult;
 
             Assert.IsNotNull(badRequestResult);
             Assert.AreSame("The input must be more the 2 but less that 100000", badRequestResult.Value);
-            calculator.DidNotReceive();
+            _calculator.DidNotReceive();
+        }
+
+        [Test]
+        public void CalledPostWithValidData()
+        {
+            var donation = new GiftAidDonation()
+            {
+                DonationAmount = 10,
+                Name = "name",
+                PostCode = "postCode"
+            };
+
+            _donationRepository.RecordDonation(donation).Returns(new GiftAidDonation()
+            {
+                Id = Guid.NewGuid(),
+            });
+
+            var result = _controller.Post(donation);
+
+            var createdRequestResult = result as CreatedResult;
+            Assert.IsNotNull(createdRequestResult);
+            _donationRepository.Received().RecordDonation(donation);
+        }
+
+        [Test]
+        [TestCase(0, "name", "postCode")]
+        [TestCase(10, null, "postCode")]
+        [TestCase(10, "name", null)]
+        [TestCase(10, "name", "")]
+        [TestCase(10, "", "postCode")]
+        public void CalledPostWithInvalidData(decimal donationAmount, string name, string postCode)
+        {
+            var donation = new GiftAidDonation()
+            {
+                DonationAmount = donationAmount,
+                Name = name,
+                PostCode = postCode
+            };
+
+            var result = _controller.Post(donation);
+
+            var badRequestResult = result as BadRequestResult;
+            Assert.IsNotNull(badRequestResult);
         }
     }
 }

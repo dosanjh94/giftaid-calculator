@@ -6,6 +6,14 @@ namespace JG.FinTechTest.Tests
 {
     public class GiftAidControllerTest
     {
+        private IGiftAidCalculator _calculator;
+
+        [SetUp]
+        public void Setup()
+        {
+            _calculator = new GiftAidCalculator();
+        }
+
         [Test]
         [TestCase(0,0)]
         [TestCase(100,25)]
@@ -13,8 +21,7 @@ namespace JG.FinTechTest.Tests
         [TestCase(171.98,42.99)]
         public void GiftAidCalculationTest(decimal donation, decimal expected)
         {
-            var calculator = new GiftAidCalculator();
-            var result = calculator.CalculateGiftAid(donation);
+            var result = _calculator.CalculateGiftAid(donation);
             Assert.AreEqual(expected, result);
         }
 
@@ -24,8 +31,7 @@ namespace JG.FinTechTest.Tests
         [TestCase(-0.5)]
         public void GiftAidNegativeAmountCalculationTest(decimal donation)
         {
-            var calculator = new GiftAidCalculator();
-            Assert.Throws<ArgumentException>(() => calculator.CalculateGiftAid(donation));
+            Assert.Throws<ArgumentException>(() => _calculator.CalculateGiftAid(donation));
         }
     }
 }
