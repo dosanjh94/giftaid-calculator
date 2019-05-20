@@ -15,16 +15,16 @@ namespace JG.FinTechTest.Tests.Repositories
 {
     public class DonationRepositoryTest
     {
-        private MemoryStream memoryStream;
-        private LiteDatabase db;
+        private MemoryStream _memoryStream;
+        private LiteDatabase _db;
         private DonationRepository _donationRepository;
 
         [SetUp]
         public void Setup()
         {
-            memoryStream = new MemoryStream();
-            db = new LiteDatabase(memoryStream);
-            _donationRepository = new DonationRepository(db);
+            _memoryStream = new MemoryStream();
+            _db = new LiteDatabase(_memoryStream);
+            _donationRepository = new DonationRepository(_db);
         }
 
         [Test]
@@ -37,10 +37,10 @@ namespace JG.FinTechTest.Tests.Repositories
             };
             var result = _donationRepository.RecordDonation(donation);
 
-            var collectionExists = db.CollectionExists("donations");
+            var collectionExists = _db.CollectionExists("donations");
             Assert.IsTrue(collectionExists);
 
-            var collection = db.GetCollection<GiftAidDonation>("donations");
+            var collection = _db.GetCollection<GiftAidDonation>("donations");
             var dbResult = collection.FindById(result.Id);
 
             Assert.AreEqual(donation.DonationAmount, dbResult.DonationAmount);
@@ -51,8 +51,8 @@ namespace JG.FinTechTest.Tests.Repositories
         [TearDown]
         public void TearDown()
         {
-            memoryStream.Dispose();
-            db.Dispose();
+            _memoryStream.Dispose();
+            _db.Dispose();
         }
     }
 }

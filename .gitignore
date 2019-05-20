@@ -349,3 +349,4 @@ healthchecksdb
 MigrationBackup/
 
 /JG.FinTechTest/JG.FinTechTest.xml
+/JG.FinTechTest/main.db

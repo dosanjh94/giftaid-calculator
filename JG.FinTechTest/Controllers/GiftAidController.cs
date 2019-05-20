@@ -52,8 +52,12 @@ namespace JG.FinTechTest.Controllers
         /// <summary>
         /// Post a donation eligible for a gift aid reclaim
         /// </summary>
-        /// <param name="donation"></param>
-        /// <returns></returns>
+        /// <param name="donationAmount">The value of the donation made</param>
+        /// <param name="name">The name of the donor</param>
+        /// <param name="postCode">The post code of the donor</param>
+        /// <response code="201">The donation has been stored</response>
+        /// <response code="400">If no or invalid donation is recieved</response>  
+        /// <returns>The object sent with an Id</returns>
         [HttpPost]
         public IActionResult Post([FromBody] GiftAidDonation donation)
         {

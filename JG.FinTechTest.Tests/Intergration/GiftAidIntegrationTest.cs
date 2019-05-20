@@ -16,31 +16,31 @@ namespace JG.FinTechTest.Tests.Integration
 {
     public class GiftAidIntegrationTest
     {
-        private TestServer server;
-        private HttpClient client;
-        private MemoryStream memoryStream;
-        private LiteDatabase db;
+        private TestServer _server;
+        private HttpClient _client;
+        private MemoryStream _memoryStream;
+        private LiteDatabase _db;
 
         [SetUp]
         public void Setup()
         {
-            memoryStream = new MemoryStream();
-            db = new LiteDatabase(memoryStream);
+            _memoryStream = new MemoryStream();
+            _db = new LiteDatabase(_memoryStream);
 
             var builder = new WebHostBuilder().UseStartup<Startup>();
             builder.ConfigureTestServices(services =>
             {
-                services.AddTransient(_ => db);
+                services.AddTransient(_ => _db);
             });
-            server = new TestServer(builder);
-            client = server.CreateClient();
+            _server = new TestServer(builder);
+            _client = _server.CreateClient();
         }
 
         [Test]
         [TestCase(100, 25)]
         public async Task GetGiftAidTest(decimal amount, decimal expected)
         {
-            var respose = await client.GetAsync($"/api/giftaid?amount={amount}");
+            var respose = await _client.GetAsync($"/api/giftaid?amount={amount}");
             var body = await respose.Content.ReadAsStringAsync();
 
             var shape = new { donationAmount = 0m, giftAidAmount = 0m };
@@ -54,7 +54,7 @@ namespace JG.FinTechTest.Tests.Integration
         [Test]
         public async Task GetGiftAidNoAmountTest()
         {
-            var respose = await client.GetAsync($"/api/giftaid");
+            var respose = await _client.GetAsync($"/api/giftaid");
 
             Assert.AreEqual(HttpStatusCode.BadRequest, respose.StatusCode);
         }
@@ -69,13 +69,13 @@ namespace JG.FinTechTest.Tests.Integration
             };
             var json = JsonConvert.SerializeObject(donation);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"/api/giftaid", content);
+            var response = await _client.PostAsync($"/api/giftaid", content);
 
             var body = await response.Content.ReadAsStringAsync();
             var shape = new { Id = ""};
             var result = JsonConvert.DeserializeAnonymousType(body, shape);
 
-            var collection = db.GetCollection<GiftAidDonation>("donations");
+            var collection = _db.GetCollection<GiftAidDonation>("donations");
             var dbResult = collection.Find(c => c.Id.ToString() == result.Id).Single();
             Assert.AreEqual(dbResult.Name, donation.name);
             Assert.AreEqual(dbResult.PostCode, donation.postCode);
@@ -85,10 +85,10 @@ namespace JG.FinTechTest.Tests.Integration
         [TearDown]
         public void TareDown()
         {
-            client.Dispose();
-            server.Dispose();
-            memoryStream.Dispose();
-            db.Dispose();
+            _client.Dispose();
+            _server.Dispose();
+            _memoryStream.Dispose();
+            _db.Dispose();
         }
     }
 }
